@@ -15,26 +15,40 @@ namespace Checkers
         public Form1()
         {
             InitializeComponent();
-            this.Width = 500;
-            this.Height = 500;
+            this.Width = 517;
+            this.Height = 540;
         }
 
         private void Form1_Paint(object sender, PaintEventArgs e)
         {
-            Graphics g = e.Graphics;
-            /*
-            Pen myPen = new Pen(Color.Black, 5);
-            Brush myBrush = new SolidBrush(Color.Blue);
-            g.DrawLine(myPen, 200, 200, 400, 100);
-            */
-            //DialogResult result = MessageBox.Show("test", "caption");
+            Image imageFile = Image.FromFile("board.png");
 
-            string ImagesDirectory = Application.ExecutablePath;
-            //ImagesDirectory.Remove(ImagesDirectory.);
+            Graphics newGraphics = Graphics.FromImage(imageFile);
 
-            //Image newIamge = Image.FromFile(ImagesDirectory);
+            e.Graphics.DrawImage(imageFile, 0, 0, 500, 500);
 
-            DialogResult result = MessageBox.Show(ImagesDirectory, "caption");
+            Brush blueBrush = new SolidBrush(Color.FromArgb(0, 150, 255));
+            Brush redBrush = new SolidBrush(Color.Red);
+
+
+            // black squares are spaced 125px apart
+            int offset = 125;
+            for (int i = 0; i < 3; i++)
+            {
+                for (int j = 0; j < 4; j++)
+                {
+                    if (i == 1)
+                    {
+                        e.Graphics.FillEllipse(blueBrush, 69 + (j * offset), 7 + (i * (offset / 2)), 50, 50);
+                    }
+                    else
+                    {
+                        e.Graphics.FillEllipse(blueBrush, 6 + (j * offset), 7 + (i * (offset / 2)), 50, 50);
+                    }
+                    
+                }
+            }
+
         }
     }
 }
