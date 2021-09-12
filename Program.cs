@@ -17,6 +17,7 @@ namespace Checkers
             Application.SetHighDpiMode(HighDpiMode.SystemAware);
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
+            System.Console.Write("Hello World");
             Application.Run(new Form1());
         }
     }
