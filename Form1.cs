@@ -30,22 +30,27 @@ namespace Checkers
             Brush blueBrush = new SolidBrush(Color.FromArgb(0, 150, 255));
             Brush redBrush = new SolidBrush(Color.Red);
 
+            Board checkerBoard = new Board();
 
-            // black squares are spaced 125px apart
-            int offset = 125;
-            for (int i = 0; i < 3; i++)
+            foreach (int[] key in checkerBoard.board.Keys)
             {
-                for (int j = 0; j < 4; j++)
+                Piece cur = checkerBoard.board[key];
+                if (cur == null)
                 {
-                    if (i == 1)
-                    {
-                        e.Graphics.FillEllipse(blueBrush, 69 + (j * offset), 7 + (i * (offset / 2)), 50, 50);
-                    }
-                    else
-                    {
-                        e.Graphics.FillEllipse(blueBrush, 6 + (j * offset), 7 + (i * (offset / 2)), 50, 50);
-                    }
-                    
+                    continue;
+                }
+                // 62 pixels is exactly halfway between each square on the board
+                // and an offset of 8 pixels is given so the pieces are centered
+                int x = cur.pos[0] * 62 + 8;
+                int y = cur.pos[1] * 62 + 8;
+                String color = cur.color;
+                if (color.Equals("blue"))
+                {
+                    e.Graphics.FillEllipse(blueBrush, x, y, 50, 50);
+                }
+                else
+                {
+                    e.Graphics.FillEllipse(redBrush, x, y, 50, 50);
                 }
             }
 
