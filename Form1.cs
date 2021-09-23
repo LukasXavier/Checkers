@@ -12,6 +12,9 @@ namespace Checkers
 {
     public partial class Form1 : Form
     {
+
+        private Board checkerBoard = new();
+
         public Form1()
         {
             InitializeComponent();
@@ -30,27 +33,18 @@ namespace Checkers
             Brush blueBrush = new SolidBrush(Color.FromArgb(0, 150, 255));
             Brush redBrush = new SolidBrush(Color.Red);
 
-            Board checkerBoard = new Board();
-
-            foreach (int[] key in checkerBoard.board.Keys)
+            foreach (Tuple<int,int> key in checkerBoard.board.Keys)
             {
+                //System.Diagnostics.Debug.WriteLine(key);
                 Piece cur = checkerBoard.board[key];
                 if (cur == null)
                 {
                     continue;
                 }
-                if (cur.pos[0] == 3 && cur.pos[1] == 2)
-                {
-                    cur.Move("left");
-                }
-                if (cur.pos[0] == 2 && cur.pos[1] == 5)
-                {
-                    cur.Move("left");
-                }
                 // 62 pixels is exactly halfway between each square on the board
                 // and an offset of 8 pixels is given so the pieces are centered
-                int x = cur.pos[0] * 62 + 8;
-                int y = cur.pos[1] * 62 + 8;
+                int x = cur.pos.Item1 * 62 + 8;
+                int y = cur.pos.Item2 * 62 + 8;
                 String color = cur.Color;
                 if (color.Equals("blue"))
                 {
@@ -61,7 +55,14 @@ namespace Checkers
                     e.Graphics.FillEllipse(redBrush, x, y, 50, 50);
                 }
             }
+            //this.Invalidate();
+        }
 
+        private void Form1_Click(object sender, EventArgs e)
+        {
+            Tuple<int, int> test = new(3,2);
+            checkerBoard.board[test].Move("left");
+            this.Refresh();
         }
     }
 }

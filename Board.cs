@@ -8,17 +8,17 @@ namespace Checkers
 {
     class Board
     {
-        public Dictionary<int[], Piece> board;
+        public Dictionary<Tuple<int,int>, Piece> board;
 
         public Board()
         {
-            board = new Dictionary<int[], Piece>();
+            board = new();
 
             for (int y = 0; y < 8; y++)
             {
                 for (int x = 0; x < 8; x++)
                 {
-                    int[] pos = new int[] { x, y };
+                    Tuple<int,int> pos = new(x, y);
                     board.Add(pos, null);
                 }
             }
@@ -27,10 +27,10 @@ namespace Checkers
             {
                 for (int x = 0; x < 8; x += 2)
                 {
-                    int[] pos = new int[] {x, y};
+                    Tuple<int, int> pos = new(x, y);
                     if (y == 0 || y == 2)
                     {
-                        pos[0]++;
+                        pos = new(x+1, y); 
                     }
                     board[pos] = new Piece("blue", pos);
                 }
@@ -40,10 +40,10 @@ namespace Checkers
             {
                 for (int x = 0; x < 8; x += 2)
                 {
-                    int[] pos = new int[] { x, y };
+                    Tuple<int, int> pos = new(x, y);
                     if (y == 6)
                     {
-                        pos[0]++;
+                        pos = new(x + 1, y); 
                     }
                     board[pos] = new Piece("red", pos);
                 }

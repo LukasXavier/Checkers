@@ -9,10 +9,10 @@ namespace Checkers
     class Piece
     {
         public string Color;
-        public int[] pos;
+        public Tuple<int, int> pos;
         public int King;
 
-        public Piece(string color, int[] pos)
+        public Piece(string color, Tuple<int,int> pos)
         {
             this.Color = color;
             this.pos = pos;
@@ -21,62 +21,53 @@ namespace Checkers
 
         public void SetPos(int x, int y)
         {
-            pos[0] = x;
-            pos[1] = y;
+            pos = new(x, y);
         }
 
-        public int[] Move(string direction)
+        public Tuple<int,int> Move(string direction)
         {
             if (Color.Equals("blue"))
             {
                 if (direction.Equals("left"))
                 {
-                    pos[0] -= 1;
-                    pos[1] += 1;
+                    pos = new(pos.Item1 - 1, pos.Item2 + 1);
                 }
                 else
                 {
-                    pos[0] += 1;
-                    pos[1] += 1;
+                    pos = new(pos.Item1 + 1, pos.Item2 + 1);
                 }
             }
             else
             {
                 if (direction.Equals("left"))
                 {
-                    pos[0] -= 1;
-                    pos[1] -= 1;
+                    pos = new(pos.Item1 - 1, pos.Item2 - 1);
                 }
                 else
                 {
-                    pos[0] += 1;
-                    pos[1] -= 1;
+                    pos = new(pos.Item1 + 1, pos.Item2 - 1);
                 }
             }
             if (King.Equals(1))
             {
                 if (direction.Equals("left_down"))
                 {
-                    pos[0] -= 1;
-                    pos[1] += 1;
+                    pos = new(pos.Item1 - 1, pos.Item2 + 1);
                 }
                 else if (direction.Equals("left_up"))
                 {
-                    pos[0] -= 1;
-                    pos[1] -= 1;
+                    pos = new(pos.Item1 - 1, pos.Item2 - 1);
                 }
                 else if (direction.Equals("right_down"))
                 {
-                    pos[0] += 1;
-                    pos[1] += 1;
+                    pos = new(pos.Item1 + 1, pos.Item2 + 1);
                 }
                 else
                 {
-                    pos[0] += 1;
-                    pos[1] -= 1;
+                    pos = new(pos.Item1 + 1, pos.Item2 - 1);
                 }
             }
-            return new int[2] { pos[0], pos[1] };
+            return pos;
         }
 
     }

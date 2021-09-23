@@ -38,6 +38,7 @@ namespace Checkers
             this.ClientSize = new System.Drawing.Size(827, 426);
             this.Name = "Form1";
             this.Text = "Form1";
+            this.Click += new System.EventHandler(this.Form1_Click);
             this.Paint += new System.Windows.Forms.PaintEventHandler(this.Form1_Paint);
             this.ResumeLayout(false);
 
