@@ -8,13 +8,13 @@ namespace Checkers
 {
     class Piece
     {
-        private string color;
-        private int[] pos;
+        public string color;
+        public int[] pos;
 
-        public Piece(string color)
+        public Piece(string color, int[] pos)
         {
             this.color = color;
-            this.pos = new int[2];
+            this.pos = pos;
         }
 
         public void setPos(int x, int y)
