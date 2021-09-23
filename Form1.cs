@@ -39,11 +39,19 @@ namespace Checkers
                 {
                     continue;
                 }
+                if (cur.pos[0] == 3 && cur.pos[1] == 2)
+                {
+                    cur.Move("left");
+                }
+                if (cur.pos[0] == 2 && cur.pos[1] == 5)
+                {
+                    cur.Move("left");
+                }
                 // 62 pixels is exactly halfway between each square on the board
                 // and an offset of 8 pixels is given so the pieces are centered
                 int x = cur.pos[0] * 62 + 8;
                 int y = cur.pos[1] * 62 + 8;
-                String color = cur.color;
+                String color = cur.Color;
                 if (color.Equals("blue"))
                 {
                     e.Graphics.FillEllipse(blueBrush, x, y, 50, 50);
