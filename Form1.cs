@@ -14,6 +14,8 @@ namespace Checkers
     {
 
         private Board checkerBoard = new();
+        private int clickMemory;
+        private Tuple<int,int> prevPos;
 
         public Form1()
         {
@@ -31,38 +33,76 @@ namespace Checkers
             e.Graphics.DrawImage(imageFile, 0, 0, 500, 500);
 
             Brush blueBrush = new SolidBrush(Color.FromArgb(0, 150, 255));
-            Brush redBrush = new SolidBrush(Color.Red);
+            Brush kingBlueBrush = new SolidBrush(Color.FromArgb(0, 0, 100));
+            Brush redBrush = new SolidBrush(Color.FromArgb(175, 0, 0));
+            Brush kingRedBrush = new SolidBrush(Color.FromArgb(100, 0, 0));
+
+            Font drawFont = new Font("Arial", 45);
+            SolidBrush drawBrush = new SolidBrush(Color.White);
+            float stringX = this.Width / 2 - 150;
+            float stringY = this.Height / 2 - 70;
+            StringFormat drawFormat = new();
+            drawFormat.FormatFlags = StringFormatFlags.DisplayFormatControl;
 
             foreach (Tuple<int,int> key in checkerBoard.board.Keys)
             {
-                //System.Diagnostics.Debug.WriteLine(key);
                 Piece cur = checkerBoard.board[key];
                 if (cur == null)
                 {
                     continue;
                 }
-                // 62 pixels is exactly halfway between each square on the board
+                // 62.5 pixels is the distance between each square on the board
                 // and an offset of 8 pixels is given so the pieces are centered
-                int x = cur.pos.Item1 * 62 + 8;
-                int y = cur.pos.Item2 * 62 + 8;
+                int x = key.Item1 * 62 + 8;
+                int y = key.Item2 * 62 + 8;
                 String color = cur.Color;
                 if (color.Equals("blue"))
                 {
                     e.Graphics.FillEllipse(blueBrush, x, y, 50, 50);
                 }
-                else
+                else if (color.Equals("red"))
                 {
                     e.Graphics.FillEllipse(redBrush, x, y, 50, 50);
                 }
+                else if (color.Equals("kingred"))
+                {
+                    e.Graphics.FillEllipse(kingRedBrush, x, y, 50, 50);
+                }
+                else
+                {
+                    e.Graphics.FillEllipse(kingBlueBrush, x, y, 50, 50);
+                }
             }
-            //this.Invalidate();
+            if (checkerBoard.gameOver() == 1)
+            {
+                e.Graphics.FillRectangle(kingBlueBrush, 0, 0, 517, 540);
+                e.Graphics.DrawString("Blue Wins", drawFont, drawBrush, stringX, stringY, drawFormat);
+            }
+            else if (checkerBoard.gameOver() == 2)
+            {
+                e.Graphics.FillRectangle(kingRedBrush, 0, 0, 517, 540);
+                e.Graphics.DrawString("Red Wins", drawFont, drawBrush, stringX, stringY, drawFormat);
+            }
         }
 
-        private void Form1_Click(object sender, EventArgs e)
+        private void Form1_MouseClick(object sender, MouseEventArgs e)
         {
-            Tuple<int, int> test = new(3,2);
-            checkerBoard.board[test].Move("left");
-            this.Refresh();
+            Tuple<int, int> coord = new(e.X/62, e.Y/62);
+            if (clickMemory == 0)
+            {
+                if (checkerBoard.board[coord] != null)
+                {
+                    this.prevPos = coord;
+                    clickMemory++;
+                }
+            }
+            else
+            {
+                clickMemory = 0;
+                checkerBoard.Move(this.prevPos, coord);
+                this.Refresh();
+            }
         }
+
     }
 }
