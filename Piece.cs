@@ -1,24 +1,24 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Checkers
+﻿namespace Checkers
 {
     class Piece
     {
         public string Color;
 
+        /// <summary>
+        /// a single Piece of a checkers game
+        /// </summary>
+        /// <param name="color">A string, should be either 'blue' or 'red'</param>
         public Piece(string color)
         {
-            this.Color = color;
+            Color = color;
         }
 
-        public void promote()
+        /// <summary>
+        /// Converts a regular peice to a king piece
+        /// </summary>
+        public void Promote()
         {
             Color = "king" + Color;
         }
-
     }
 }

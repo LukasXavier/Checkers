@@ -1,9 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Checkers
 {
@@ -197,11 +193,11 @@ namespace Checkers
 
             if (board[pos].Color.Equals("red") && pos.Item2 == 0)
             {
-                board[pos].promote();
+                board[pos].Promote();
             }
             if (board[pos].Color.Equals("blue") && pos.Item2 == 7)
             {
-                board[pos].promote();
+                board[pos].Promote();
             }
 
         }
