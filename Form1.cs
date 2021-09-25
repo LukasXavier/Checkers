@@ -21,8 +21,8 @@ namespace Checkers
         {
             // here we set the form to exist and it's size
             InitializeComponent();
-            this.Width = 517;
-            this.Height = 540;
+            Width = 517;
+            Height = 540;
         }
 
         /// <summary>
@@ -53,8 +53,8 @@ namespace Checkers
             // the top left of where you specify
             Font drawFont = new("Arial", 45);
             SolidBrush drawBrush = new(Color.White);
-            float stringX = this.Width / 2 - 150;
-            float stringY = this.Height / 2 - 70;
+            float stringX = Width / 2 - 150;
+            float stringY = Height / 2 - 70;
             StringFormat drawFormat = new();
             drawFormat.FormatFlags = StringFormatFlags.DisplayFormatControl;
 
@@ -129,7 +129,7 @@ namespace Checkers
                 if (checkerBoard.board[coord] != null)
                 {
                     // temporarly stores the pieces location
-                    this.prevPos = coord;
+                    prevPos = coord;
                     clickMemory++;
                 }
             }
@@ -137,8 +137,8 @@ namespace Checkers
             else
             {
                 clickMemory = 0;
-                checkerBoard.Move(this.prevPos, coord);
-                this.Refresh();
+                checkerBoard.Move(prevPos, coord);
+                Refresh();
             }
         }
 
