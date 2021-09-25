@@ -139,7 +139,7 @@ namespace Checkers
             int y = pos.Item2 - prevPos.Item2;
             
             // checks that we are trying to move a piece to a blank spot
-            if (cur == null && board[pos] != null)
+            if (cur == null || board[pos] != null)
             {
                 return;
             }
