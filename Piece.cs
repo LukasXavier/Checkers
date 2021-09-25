@@ -14,7 +14,7 @@
         }
 
         /// <summary>
-        /// Converts a regular peice to a king piece
+        /// Converts a regular piece to a king piece
         /// </summary>
         public void Promote()
         {
