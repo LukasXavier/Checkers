@@ -8,7 +8,7 @@ namespace Checkers
     {
         // constructs the Board
         // both clickMemory and prevPos is used for handling user input
-        private Board checkerBoard = new();
+        private readonly Board checkerBoard = new();
         private int clickMemory;
         private Tuple<int, int> prevPos;
 
@@ -43,16 +43,16 @@ namespace Checkers
             e.Graphics.DrawImage(imageFile, 0, 0, 500, 500);
 
             // to draw something that isn't an image, you need to make a brush object of that color
-            Brush blueBrush = new SolidBrush(Color.FromArgb(0, 150, 255));
-            Brush kingBlueBrush = new SolidBrush(Color.FromArgb(0, 0, 100));
-            Brush redBrush = new SolidBrush(Color.FromArgb(175, 0, 0));
-            Brush kingRedBrush = new SolidBrush(Color.FromArgb(100, 0, 0));
+            SolidBrush blueBrush = new(Color.FromArgb(0, 150, 255));
+            SolidBrush kingBlueBrush = new(Color.FromArgb(0, 0, 100));
+            SolidBrush redBrush = new(Color.FromArgb(175, 0, 0));
+            SolidBrush kingRedBrush = new(Color.FromArgb(100, 0, 0));
 
             // this chunk of code is for the game over screen, we set some text to be the color white
             // the font size 45, about center with a little offset to adjust for text being draw from
             // the top left of where you specify
-            Font drawFont = new Font("Arial", 45);
-            SolidBrush drawBrush = new SolidBrush(Color.White);
+            Font drawFont = new("Arial", 45);
+            SolidBrush drawBrush = new(Color.White);
             float stringX = this.Width / 2 - 150;
             float stringY = this.Height / 2 - 70;
             StringFormat drawFormat = new();
@@ -136,7 +136,7 @@ namespace Checkers
             // clickMemory 1 means that the position is the move-to position
             else
             {
-                clickMemory--;
+                clickMemory = 0;
                 checkerBoard.Move(this.prevPos, coord);
                 this.Refresh();
             }
