@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Drawing;
+using System.Threading;
 using System.Windows.Forms;
 
 namespace Checkers
@@ -11,6 +13,7 @@ namespace Checkers
         private readonly Board checkerBoard = new();
         private int clickMemory;
         private Tuple<int, int> prevPos;
+        private bool playerTurn = true;
 
         /// <summary>
         /// A form object is a specific class provided by Microsoft that is modified by the user
@@ -47,6 +50,8 @@ namespace Checkers
             SolidBrush kingBlueBrush = new(Color.FromArgb(0, 0, 100));
             SolidBrush redBrush = new(Color.FromArgb(175, 0, 0));
             SolidBrush kingRedBrush = new(Color.FromArgb(100, 0, 0));
+            Pen pen = new(Brushes.Black);
+            pen.Width = 3;
 
             // this chunk of code is for the game over screen, we set some text to be the color white
             // the font size 45, about center with a little offset to adjust for text being draw from
@@ -93,7 +98,22 @@ namespace Checkers
                 {
                     e.Graphics.FillEllipse(kingBlueBrush, x, y, 50, 50);
                 }
+
+                foreach (Tuple<int, int> newPos in checkerBoard.PossibleMoves(prevPos))
+                {
+                    x = newPos.Item1 * 62 + 8;
+                    y = newPos.Item2 * 62 + 8;
+                    e.Graphics.DrawEllipse(pen, x, y, 50, 50);
+                }
             }
+
+            if (clickMemory == 1 && prevPos != null)
+            {
+                int indicatorX = prevPos.Item1 * 62 + 8;
+                int indicatorY = prevPos.Item2 * 62 + 8;
+                e.Graphics.DrawEllipse(pen, indicatorX, indicatorY, 50, 50);
+            }
+
             // gameOver() == 0 means there are still pieces on the board
             // gameOver() == 1 means that blue won and 2 means that red won
             if (checkerBoard.GameOver() == 1)
@@ -108,6 +128,18 @@ namespace Checkers
                 e.Graphics.FillRectangle(kingRedBrush, 0, 0, 517, 540);
                 e.Graphics.DrawString("Red Wins", drawFont, drawBrush, stringX, stringY, drawFormat);
             }
+
+            if (!playerTurn)
+            {
+                Tuple<int, int>[] oppMove = OpponentMove(checkerBoard);
+                Thread.Sleep(1500);
+                if (!TookPiece(oppMove[0], oppMove[1]))
+                {
+                    playerTurn = true;
+                }
+                Refresh();
+            }
+
         }
 
         /// <summary>
@@ -119,6 +151,10 @@ namespace Checkers
         /// <param name="e">the event data provided by the control object</param>
         private void Form1_MouseClick(object sender, MouseEventArgs e)
         {
+            if (!playerTurn)
+            {
+                return;
+            }
             // we get the integer value of where the user clicked
             Tuple<int, int> coord = new(e.X / 62, e.Y / 62);
             // clickMemory 0 means that we are selecting a piece
@@ -128,17 +164,67 @@ namespace Checkers
                 if (checkerBoard.board[coord].Color != null)
                 {
                     // temporarly stores the pieces location
-                    prevPos = coord;
-                    clickMemory++;
+                    if (checkerBoard.board[coord].Color.Contains("red"))
+                    {
+                        prevPos = coord;
+                        clickMemory++;
+                        Refresh();
+                    }
                 }
             }
             // clickMemory 1 means that the position is the move-to position
             else
             {
                 clickMemory = 0;
-                checkerBoard.Move(prevPos, coord);
+                if (checkerBoard.Move(prevPos, coord, true) 
+                    && checkerBoard.board[prevPos].Color.Contains("red"))
+                {
+                    if (!TookPiece(prevPos, coord))
+                    {
+                        playerTurn = false;
+                    }
+                    checkerBoard.Move(prevPos, coord, false);
+                }
+                prevPos = null;
                 Refresh();
             }
+        }
+
+        private static Tuple<int, int>[] OpponentMove(Board checkerBoard)
+        {
+            Random rnd = new Random();
+            Tuple<int, int>[] opponentMove = new Tuple<int, int>[2];
+            List<Tuple<int, int>[]> opponentMoves = new();
+            foreach (Tuple<int,int> key in checkerBoard.board.Keys)
+            {
+                if (checkerBoard.board[key].Color == null)
+                {
+                    continue;
+                }
+                if (checkerBoard.board[key].Color.Contains("blue"))
+                {
+                    List<Tuple<int, int>> validMoves = checkerBoard.PossibleMoves(key);
+
+                    foreach (Tuple<int, int> move in validMoves)
+                    {
+                        opponentMove[0] = key;
+                        opponentMove[1] = move;
+                        opponentMoves.Add(opponentMove);
+                    }
+                }
+            }
+            Tuple<int, int>[] randomMove = opponentMoves[rnd.Next(0, opponentMove.Length)];
+            checkerBoard.Move(randomMove[0], randomMove[1], false);
+            return opponentMove;
+        }
+
+        private static bool TookPiece(Tuple<int, int> prevPos, Tuple<int, int> pos)
+        {
+            if (Math.Abs(prevPos.Item1 - pos.Item1) == 2)
+            {
+                return true;
+            }
+            return false;
         }
 
     }
