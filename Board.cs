@@ -5,6 +5,23 @@ namespace Checkers
 {
     class Board
     {
+        /**
+         *  original Piece was an object but we kept reducing it's functionally until it was just a
+         *  String with a single 1 line function, to further demonstrate C# we pulled it out and made
+         *  it a struct, we could have made the board a map from (int, int) --> String but thought
+         *  since we're using C# might as well use a struct add some flare.
+         */
+        public struct Piece
+        {
+            public String Color;
+            public Piece(string color)
+            {
+                Color = color;
+            }
+            // this isn't need for Checkers but I thought it was interesting that structs can have methods in C#
+            //public override string ToString() => $"{Color}";
+        }
+
         // this is our data structure for storing the pieces
         public Dictionary<Tuple<int,int>, Piece> board;
 
@@ -13,43 +30,46 @@ namespace Checkers
         /// </summary>
         public Board()
         {
+            // C# allows us to not need to specify type when constructing a new instance if it is already defined somewhere else
             board = new();
 
-            // this is defining the keys for the dictionary
-            for (int y = 0; y < 8; y++)
+            // loops through all the locations on the board and populates them with pieces
+            for (int x = 0; x < 8; x++)
             {
-                for (int x = 0; x < 8; x++)
+                for (int y = 0; y < 8; y++)
                 {
-                    Tuple<int,int> pos = new(x, y);
-                    board.Add(pos, null);
-                }
-            }
-
-            // this sets the blue pieces to be on top rows
-            for (int y = 0; y < 3; y++)
-            {
-                for (int x = 0; x < 8; x += 2)
-                {
-                    Tuple<int, int> pos = new(x, y);
+                    // the keys need to be established before we set the pieces down
+                    board.Add(new(x, y), new(null));
+                    // for the values between [0,2] are blue pieces but the middle row is offset from the others
                     if (y == 0 || y == 2)
                     {
-                        pos = new(x+1, y); 
+                        if ((x + 1) % 2 == 0)
+                        {
+                            board[new(x, y)] = new("blue");
+                        }
                     }
-                    board[pos] = new Piece("blue");
-                }
-            }
-
-            // this sets the red pieces to be on bottom rows
-            for (int y = 5; y < 8; y++)
-            {
-                for (int x = 0; x < 8; x += 2)
-                {
-                    Tuple<int, int> pos = new(x, y);
+                    if (y == 1)
+                    {
+                        if (x % 2 == 0)
+                        {
+                            board[new(x, y)] = new("blue");
+                        }
+                    }
+                    // for the values between [5,7] are red pieces but the middle row is offset from the others
+                    if (y == 5 || y == 7)
+                    {
+                        if (x % 2 == 0)
+                        {
+                            board[new(x, y)] = new("red");
+                        }
+                    }
                     if (y == 6)
                     {
-                        pos = new(x + 1, y); 
+                        if ((x + 1) % 2 == 0)
+                        {
+                            board[new(x, y)] = new("red");
+                        }
                     }
-                    board[pos] = new Piece("red");
                 }
             }
 
@@ -59,14 +79,14 @@ namespace Checkers
         /// This returns the current status of the game as int from [0,2]
         /// </summary>
         /// <returns>0 for game not over, 1 for blue wins, 2 for red wins</returns>
-        public int gameOver()
+        public int GameOver()
         {
             int blue = 0;
             int red = 0;
             // counts sides pieces
             foreach (Tuple<int, int> key in board.Keys)
             {
-                if (board[key] != null)
+                if (board[key].Color != null)
                 {
                     // since a piece and either be red, blue, kingred, kingblue, we just check if it contains red or blue
                     if (board[key].Color.Contains("red")) {
@@ -112,7 +132,7 @@ namespace Checkers
                 between = new(prevPos.Item1 + 1, prevPos.Item2 + offset);
             }
             // checks that you're trying to capture the other player's piece
-            if (board[between] == null || board[pos] != null)
+            if (board[between].Color == null || board[pos].Color != null)
             {
                 return;
             }
@@ -120,8 +140,8 @@ namespace Checkers
             {
                 // capturing a piece is the same as just deleting it
                 board[pos] = board[prevPos];
-                board[between] = null;
-                board[prevPos] = null;
+                board[between] = new Piece(null);
+                board[prevPos] = new Piece(null);
             }
         }
 
@@ -139,7 +159,7 @@ namespace Checkers
             int y = pos.Item2 - prevPos.Item2;
             
             // checks that we are trying to move a piece to a blank spot
-            if (cur == null || board[pos] != null)
+            if (cur.Color == null || board[pos].Color != null)
             {
                 return;
             }
@@ -152,7 +172,7 @@ namespace Checkers
                 if (x == 1 && y == 1)
                 {
                     board[pos] = cur;
-                    board[prevPos] = null;
+                    board[prevPos] = new Piece(null);
                 }
                 // attempts to capture
                 else if (x == 2 && y == 2)
@@ -167,7 +187,7 @@ namespace Checkers
                 if (x == 1 && y == 1)
                 {
                     board[pos] = cur;
-                    board[prevPos] = null;
+                    board[prevPos] = new Piece(null);
                 }
                 // attempts to capture
                 else if (x == 2 && y == 2)
@@ -177,7 +197,7 @@ namespace Checkers
                 // if a blue piece makes it all the way to the 'bottom' it is promoted to a king
                 if (pos.Item2 == 7)
                 {
-                    board[pos].Promote();
+                    board[pos] = new Piece("king" + board[pos].Color);
                 }
             }
             // non-king red pieces can only move 'down' the board so the y bound is positive 1
@@ -187,7 +207,7 @@ namespace Checkers
                 if (x == 1 && y == -1)
                 {
                     board[pos] = cur;
-                    board[prevPos] = null;
+                    board[prevPos] = new Piece(null);
                 }
                 // attempts to capture
                 else if (x == 2 && y == -2)
@@ -197,7 +217,7 @@ namespace Checkers
                 // if a red piece makes it all the way to the 'top' it is promoted to a king
                 if (pos.Item2 == 0)
                 {
-                    board[pos].Promote();
+                    board[pos] = new Piece("king" + board[pos].Color);
                 }
             }
         }
