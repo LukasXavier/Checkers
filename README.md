@@ -6,7 +6,8 @@ This program was made to demonstrate a rudimentary knowledge of C# as a 4-week p
 
 
 There is a release tab on the right of github where you can download an already compiled version with all the necessary
-files to run Checkers, if you would like to run it in the IDE, we recommend using Microsoft's Visual Studio.
+files to run Checkers, simply run the Checkers.exe file, if you would like to run it in the IDE, we recommend using
+Microsoft's Visual Studio.
 https://visualstudio.microsoft.com/thank-you-downloading-visual-studio/?sku=Community&rel=16
 
 You might need to also download some frameworks, we used the .Net 5.0 framework for this project
