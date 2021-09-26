@@ -63,9 +63,9 @@ namespace Checkers
             foreach (Tuple<int, int> key in checkerBoard.board.Keys)
             {
                 // cur is the current Piece we are drawing
-                Piece cur = checkerBoard.board[key];
+                String color = checkerBoard.board[key].Color;
                 // since half or more of the board is empty we need to check if we're on a blank one or not
-                if (cur == null)
+                if (color == null)
                 {
                     continue;
                 }
@@ -76,7 +76,6 @@ namespace Checkers
 
                 // a Piece is determined by it's color so this how we know what color to make it
                 // we place each piece at x,y
-                String color = cur.Color;
                 if (color.Equals("blue"))
                 {
                     e.Graphics.FillEllipse(blueBrush, x, y, 50, 50);
@@ -97,13 +96,13 @@ namespace Checkers
             }
             // gameOver() == 0 means there are still pieces on the board
             // gameOver() == 1 means that blue won and 2 means that red won
-            if (checkerBoard.gameOver() == 1)
+            if (checkerBoard.GameOver() == 1)
             {
                 // draws a square the size of the canvas and displays 'Blue Wins'
                 e.Graphics.FillRectangle(kingBlueBrush, 0, 0, 517, 540);
                 e.Graphics.DrawString("Blue Wins", drawFont, drawBrush, stringX, stringY, drawFormat);
             }
-            else if (checkerBoard.gameOver() == 2)
+            else if (checkerBoard.GameOver() == 2)
             {
                 // draws a square the size of the canvas and displays 'Red Wins'
                 e.Graphics.FillRectangle(kingRedBrush, 0, 0, 517, 540);
@@ -126,7 +125,7 @@ namespace Checkers
             if (clickMemory == 0)
             {
                 // checks if the user clicked on not a piece
-                if (checkerBoard.board[coord] != null)
+                if (checkerBoard.board[coord].Color != null)
                 {
                     // temporarly stores the pieces location
                     prevPos = coord;
