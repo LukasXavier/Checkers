@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 
 namespace Checkers
 {
@@ -81,6 +82,7 @@ namespace Checkers
         {
             int blue = 0;
             int red = 0;
+            int moves = 0;
             // counts sides pieces
             foreach (Tuple<int, int> key in board.Keys)
             {
@@ -93,9 +95,14 @@ namespace Checkers
                     else if (board[key].Color.Contains("blue")) {
                         blue++;
                     }
+                    moves += this.PossibleMoves(key).Count;
                 }
             }
-            if (blue > 0 && red > 0)
+            if (moves == 0)
+            {
+                return 3;
+            }
+            else if (blue > 0 && red > 0)
             {
                 return 0;
             }
@@ -288,6 +295,10 @@ namespace Checkers
 
         public bool TookPiece(Tuple<int, int> prevPos, Tuple<int, int> pos)
         {
+            if (prevPos == null || pos == null)
+            {
+                return false;
+            }
             if (Math.Abs(prevPos.Item1 - pos.Item1) == 2)
             {
                 return true;

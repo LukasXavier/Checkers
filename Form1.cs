@@ -12,7 +12,8 @@ namespace Checkers
         // constructs the Board
         // both clickMemory and prevPos is used for handling user input
         private readonly Board checkerBoard = new();
-        private Opponent blue = new();
+        private Player blue = new();
+        private Player red = new();
         private int clickMemory;
         private Tuple<int, int> prevPos;
         private bool playerTurn = true;
@@ -64,6 +65,14 @@ namespace Checkers
             float stringY = Height / 2 - 70;
             StringFormat drawFormat = new();
             drawFormat.FormatFlags = StringFormatFlags.DisplayFormatControl;
+
+            if (red.captured && !red.CanCapture(checkerBoard))
+            {
+                prevPos = null;
+                clickMemory = 0;
+                playerTurn = false;
+                Refresh();
+            }
 
             // a foreach loop syntax somewhere between javascript and python
             // we go over each key of the board which stores where pieces are currently located at
@@ -130,11 +139,16 @@ namespace Checkers
                 e.Graphics.FillRectangle(kingRedBrush, 0, 0, 517, 540);
                 e.Graphics.DrawString("Red Wins", drawFont, drawBrush, stringX, stringY, drawFormat);
             }
-
-            if (!playerTurn)
+            else if (checkerBoard.GameOver() == 3)
             {
-                blue.OpponentMove(checkerBoard, playerTurn);
-                Thread.Sleep(1500);
+                // draws a square the size of the canvas and displays 'Red Wins'
+                e.Graphics.FillRectangle(blueBrush, 0, 0, 517, 540);
+                e.Graphics.DrawString("Draw", drawFont, redBrush, stringX+65, stringY, drawFormat);
+            }
+            else if (!playerTurn)
+            {
+                blue.CPUMove(checkerBoard, playerTurn);
+                Thread.Sleep(1000);
                 if (!blue.captured)
                 {
                     playerTurn = true;
@@ -159,6 +173,7 @@ namespace Checkers
             }
             // we get the integer value of where the user clicked
             Tuple<int, int> coord = new(e.X / 62, e.Y / 62);
+
             // clickMemory 0 means that we are selecting a piece
             if (clickMemory == 0)
             {
@@ -167,7 +182,7 @@ namespace Checkers
                 {
                     // temporarly stores the pieces location
                     if (checkerBoard.board[coord].Color.Contains("red"))
-                    {
+                    { 
                         prevPos = coord;
                         clickMemory++;
                         Refresh();
@@ -181,11 +196,18 @@ namespace Checkers
                 if (checkerBoard.Move(prevPos, coord, true) 
                     && checkerBoard.board[prevPos].Color.Contains("red"))
                 {
-                    if (!checkerBoard.TookPiece(prevPos, coord))
+                    if (!red.captured)
                     {
-                        playerTurn = false;
+                        red.PlayerMove(checkerBoard, prevPos, coord, playerTurn);
+                        if (!red.captured)
+                        {
+                            playerTurn = false;
+                        } 
                     }
-                    checkerBoard.Move(prevPos, coord, false);
+                    else
+                    {
+                        red.PlayerMove(checkerBoard, prevPos, coord, playerTurn);
+                    }
                 }
                 prevPos = null;
                 Refresh();
