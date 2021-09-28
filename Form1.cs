@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Drawing;
 using System.Threading;
 using System.Windows.Forms;
@@ -11,6 +12,7 @@ namespace Checkers
         // constructs the Board
         // both clickMemory and prevPos is used for handling user input
         private readonly Board checkerBoard = new();
+        private Opponent blue = new();
         private int clickMemory;
         private Tuple<int, int> prevPos;
         private bool playerTurn = true;
@@ -131,9 +133,9 @@ namespace Checkers
 
             if (!playerTurn)
             {
-                Tuple<int, int>[] oppMove = OpponentMove(checkerBoard);
+                blue.OpponentMove(checkerBoard, playerTurn);
                 Thread.Sleep(1500);
-                if (!TookPiece(oppMove[0], oppMove[1]))
+                if (!blue.captured)
                 {
                     playerTurn = true;
                 }
@@ -179,7 +181,7 @@ namespace Checkers
                 if (checkerBoard.Move(prevPos, coord, true) 
                     && checkerBoard.board[prevPos].Color.Contains("red"))
                 {
-                    if (!TookPiece(prevPos, coord))
+                    if (!checkerBoard.TookPiece(prevPos, coord))
                     {
                         playerTurn = false;
                     }
@@ -188,43 +190,6 @@ namespace Checkers
                 prevPos = null;
                 Refresh();
             }
-        }
-
-        private static Tuple<int, int>[] OpponentMove(Board checkerBoard)
-        {
-            Random rnd = new Random();
-            Tuple<int, int>[] opponentMove = new Tuple<int, int>[2];
-            List<Tuple<int, int>[]> opponentMoves = new();
-            foreach (Tuple<int,int> key in checkerBoard.board.Keys)
-            {
-                if (checkerBoard.board[key].Color == null)
-                {
-                    continue;
-                }
-                if (checkerBoard.board[key].Color.Contains("blue"))
-                {
-                    List<Tuple<int, int>> validMoves = checkerBoard.PossibleMoves(key);
-
-                    foreach (Tuple<int, int> move in validMoves)
-                    {
-                        opponentMove[0] = key;
-                        opponentMove[1] = move;
-                        opponentMoves.Add(opponentMove);
-                    }
-                }
-            }
-            Tuple<int, int>[] randomMove = opponentMoves[rnd.Next(0, opponentMove.Length)];
-            checkerBoard.Move(randomMove[0], randomMove[1], false);
-            return opponentMove;
-        }
-
-        private static bool TookPiece(Tuple<int, int> prevPos, Tuple<int, int> pos)
-        {
-            if (Math.Abs(prevPos.Item1 - pos.Item1) == 2)
-            {
-                return true;
-            }
-            return false;
         }
 
     }

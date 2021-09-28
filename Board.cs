@@ -285,5 +285,14 @@ namespace Checkers
             }
             return false;
         }
+
+        public bool TookPiece(Tuple<int, int> prevPos, Tuple<int, int> pos)
+        {
+            if (Math.Abs(prevPos.Item1 - pos.Item1) == 2)
+            {
+                return true;
+            }
+            return false;
+        }
     }
 }
