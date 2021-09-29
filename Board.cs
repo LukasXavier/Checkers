@@ -82,7 +82,8 @@ namespace Checkers
         {
             int blue = 0;
             int red = 0;
-            int moves = 0;
+            int redMoves = 0;
+            int blueMoves = 0;
             // counts sides pieces
             foreach (Tuple<int, int> key in board.Keys)
             {
@@ -91,28 +92,29 @@ namespace Checkers
                     // since a piece and either be red, blue, kingred, kingblue, we just check if it contains red or blue
                     if (board[key].Color.Contains("red")) {
                         red++;
+                        redMoves += this.PossibleMoves(key).Count;
                     }
                     else if (board[key].Color.Contains("blue")) {
                         blue++;
+                        blueMoves += this.PossibleMoves(key).Count;
                     }
-                    moves += this.PossibleMoves(key).Count;
                 }
             }
-            if (moves == 0)
+            if (redMoves == 0 && blueMoves == 0)
             {
                 return 3;
             }
-            else if (blue > 0 && red > 0)
-            {
-                return 0;
-            }
-            else if (blue > 0 && red == 0)
+            else if ((blue > 0 && red == 0) || redMoves == 0)
             {
                 return 1;
             }
-            else
+            else if ((red > 0 && blue == 0) || blueMoves == 0) 
             {
                 return 2;
+            }
+            else
+            {
+                return 0;
             }
         }
 
