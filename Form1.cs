@@ -39,7 +39,7 @@ namespace Checkers
         /// <param name="e">the event data provided by the control object</param>
         private void Form1_Paint(object sender, PaintEventArgs e)
         {
-            // displays the board using an image of a checkerboard
+            // displays the Gameboard using an image of a checkerGameboard
             Image imageFile = Image.FromFile("board.png");
             e.Graphics.DrawImage(imageFile, 0, 0, 500, 500);
 
@@ -60,7 +60,7 @@ namespace Checkers
             drawFormat.FormatFlags = StringFormatFlags.DisplayFormatControl;
 
             // handles repeated capturing for the player
-            if (red.captured && !red.CanCapture(checkerBoard))
+            if (red.Captured && !red.CanCapture(checkerBoard))
             {
                 prevPos = null;
                 clickMemory = 0;
@@ -68,16 +68,16 @@ namespace Checkers
                 Refresh();
             }
 
-            // goes through each position on the board and displays where the pieces are
-            foreach (Tuple<int, int> key in checkerBoard.board.Keys)
+            // goes through each position on the Gameboard and displays where the pieces are
+            foreach (Tuple<int, int> key in checkerBoard.Gameboard.Keys)
             {
-                String color = checkerBoard.board[key].Color;
+                String color = checkerBoard.Gameboard[key].Color;
                 // checks for blank space
                 if (color == null)
                 {
                     continue;
                 }
-                // 62.5 pixels is the distance between each square on the board
+                // 62.5 pixels is the distance between each square on the Gameboard
                 // and an offset of 8 pixels is given so the pieces are centered
                 int x = key.Item1 * 62 + 8;
                 int y = key.Item2 * 62 + 8;
@@ -101,7 +101,7 @@ namespace Checkers
                     e.Graphics.FillEllipse(kingBlueBrush, x, y, 50, 50);
                 }
 
-                // draws every piece on the board after each turn
+                // draws every piece on the Gameboard after each turn
                 foreach (Tuple<int, int> newPos in checkerBoard.PossibleMoves(prevPos))
                 {
                     x = newPos.Item1 * 62 + 8;
@@ -118,7 +118,7 @@ namespace Checkers
                 e.Graphics.DrawEllipse(pen, indicatorX, indicatorY, 50, 50);
             }
 
-            // gameOver() == 0 means there are still pieces on the board
+            // gameOver() == 0 means there are still pieces on the Gameboard
             // gameOver() == 1 means that blue won
             // gameOver() == 2 means that red won
             // gameOver() == 3 means there is a tie
@@ -146,7 +146,7 @@ namespace Checkers
             {
                 blue.CPUMove(checkerBoard, playerTurn);
                 Thread.Sleep(1000);
-                if (!blue.captured)
+                if (!blue.Captured)
                 {
                     playerTurn = true;
                 }
@@ -169,17 +169,17 @@ namespace Checkers
             {
                 return;
             }
-            // gets the position on the board where the user clicked
+            // gets the position on the Gameboard where the user clicked
             Tuple<int, int> coord = new(e.X / 62, e.Y / 62);
 
             // clickMemory 0 means that we are selecting a piece
             if (clickMemory == 0)
             {
                 // checks if the user clicked on not a piece
-                if (checkerBoard.board[coord].Color != null)
+                if (checkerBoard.Gameboard[coord].Color != null)
                 {
                     // temporarly stores the pieces location
-                    if (checkerBoard.board[coord].Color.Contains("red"))
+                    if (checkerBoard.Gameboard[coord].Color.Contains("red"))
                     { 
                         prevPos = coord;
                         clickMemory++;
@@ -192,13 +192,13 @@ namespace Checkers
             {
                 clickMemory = 0;
                 if (checkerBoard.Move(prevPos, coord, true) 
-                    && checkerBoard.board[prevPos].Color.Contains("red"))
+                    && checkerBoard.Gameboard[prevPos].Color.Contains("red"))
                 {
-                    if (!red.captured)
+                    if (!red.Captured)
                     {
                         red.PlayerMove(checkerBoard, prevPos, coord, playerTurn);
                         // makes sure the player cannot move again if they didn't capture
-                        if (!red.captured)
+                        if (!red.Captured)
                         {
                             playerTurn = false;
                         } 
