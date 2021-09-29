@@ -102,6 +102,15 @@ namespace Checkers
             else
             {
                 randomMove = CPUMoves[rnd.Next(0, CPUMoves.Count)];
+                // forces the cpu to capture when it can
+                foreach (Tuple<int, int>[] move in CPUMoves)
+                {
+                    if (checkerBoard.TookPiece(move[0], move[1]))
+                    {
+                        randomMove = move;
+                        break;
+                    }
+                }
                 checkerBoard.Move(randomMove[0], randomMove[1], false);
             }
             // stores the state of the piece after a capture
