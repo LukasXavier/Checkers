@@ -5,6 +5,8 @@ namespace Checkers
 {
     class Player
     {
+        // captured stores if the previous move was a capture move
+        // lastMove stores the position that the player moved last
         public bool captured;
         private Tuple<int, int> lastMove;
 
@@ -14,6 +16,11 @@ namespace Checkers
             lastMove = null;
         }
 
+        /// <summary>
+        /// determines whether the Player can capture or not
+        /// </summary>
+        /// <param name="checkerBoard">the board and its methods for making a move</param>
+        /// <returns>true if the Player can capture and false otherwise</returns>
         public bool CanCapture(Board checkerBoard)
         {
             if (lastMove == null)
@@ -34,16 +41,23 @@ namespace Checkers
             return false;
         }
 
+        /// <summary>
+        /// makes a random move for the CPU player
+        /// </summary>
+        /// <param name="checkerBoard">the board and its methods for making a move</param>
+        /// <param name="playerTurn">a bool that signifies if the CPU should be 
+        /// making a move or not</param>
         public void CPUMove(Board checkerBoard, bool playerTurn)
         {
+            // terminates if the cpu player should not be making a turn
             if (playerTurn)
             {
                 return;
             }
             Random rnd = new Random();
             Tuple<int, int>[] randomMove = new Tuple<int, int>[2];
-            Tuple<int, int>[] playerMove = new Tuple<int, int>[2];
-            List<Tuple<int, int>[]> playerMoves = new();
+            List<Tuple<int, int>[]> CPUMoves = new();
+            // finds all blue pieces and adds all of their valid moves to CPUMoves
             foreach (Tuple<int, int> key in checkerBoard.board.Keys)
             {
                 if (checkerBoard.board[key].Color == null)
@@ -56,14 +70,15 @@ namespace Checkers
 
                     foreach (Tuple<int, int> move in validMoves)
                     {
-                        playerMove = new Tuple<int, int>[2];
-                        playerMove[0] = key;
-                        playerMove[1] = move;
-                        playerMoves.Add(playerMove);
+                        Tuple<int, int>[] CPUMove = new Tuple<int, int>[2];
+                        CPUMove[0] = key;
+                        CPUMove[1] = move;
+                        CPUMoves.Add(CPUMove);
                     }
                 }
             }
 
+            // handles repeated captures for the cpu player
             if (lastMove != null)
             {
                 List<Tuple<int, int>> afterCaptureMoves = checkerBoard.PossibleMoves(lastMove);
@@ -83,16 +98,19 @@ namespace Checkers
                     checkerBoard.Move(randomMove[0], randomMove[1], false);
                 }
             } 
+            // handles moves that are not captures
             else
             {
-                randomMove = playerMoves[rnd.Next(0, playerMoves.Count)];
+                randomMove = CPUMoves[rnd.Next(0, CPUMoves.Count)];
                 checkerBoard.Move(randomMove[0], randomMove[1], false);
             }
+            // stores the state of the piece after a capture
             if (checkerBoard.TookPiece(randomMove[0], randomMove[1]))
             {
                 captured = true;
                 lastMove = randomMove[1];
             }
+            // resets the state of the piece if a capture was not made
             else
             {
                 captured = false;
@@ -100,14 +118,24 @@ namespace Checkers
             }
         }
 
+        /// <summary>
+        /// handles moves that the human player is making
+        /// </summary>
+        /// <param name="checkerBoard">the board and its methods for making a move</param>
+        /// <param name="prevPos">the position a move is being made from</param>
+        /// <param name="pos">the position the player is trying to move to</param>
+        /// <param name="playerTurn">a bool that signifies if the human player should be 
+        /// making a move or not</param>
         public void PlayerMove(Board checkerBoard, Tuple<int, int> prevPos, Tuple<int, int> pos, bool playerTurn)
         {
+            // terminates if the human player should not be making a turn
             if (!playerTurn)
             {
                 captured = false;
                 lastMove = null;
                 return;
             }
+            // handles when the last move was a capture
             if (lastMove != null)
             {
                 List<Tuple<int, int>> afterCaptureMoves = checkerBoard.PossibleMoves(lastMove);
@@ -128,15 +156,18 @@ namespace Checkers
                     } 
                 }
             }
+            // handles when the last move was not a capture
             else
             {
                 checkerBoard.Move(prevPos, pos, false);
             }
+            // stores the state of the piece after a capture
             if (checkerBoard.TookPiece(prevPos, pos))
             {
                 captured = true;
                 lastMove = pos;
             }
+            // resets the state of the piece if a capture was not made
             else
             {
                 captured = false;

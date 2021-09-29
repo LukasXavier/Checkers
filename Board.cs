@@ -5,14 +5,12 @@ using System.Diagnostics;
 namespace Checkers
 {
 
-    // test
     class Board
     {
         /**
-         *  original Piece was an object but we kept reducing it's functionally until it was just a
-         *  String with a single 1 line function, to further demonstrate C# we pulled it out and made
-         *  it a struct, we could have made the board a map from (int, int) --> String but thought
-         *  since we're using C# might as well use a struct add some flare.
+         *  Represents a piece on the board, can have a color value of "red",
+         *  "blue" or null. All spaces on the board have a Piece in them but 
+         *  spaces with no displayed piece have a color value of null.
          */
         public struct Piece
         {
@@ -21,11 +19,9 @@ namespace Checkers
             {
                 Color = color;
             }
-            // this isn't need for Checkers but I thought it was interesting that structs can have methods in C#
-            //public override string ToString() => $"{Color}";
         }
 
-        // this is our data structure for storing the pieces
+        // the data structure for storing the pieces
         public Dictionary<Tuple<int,int>, Piece> board;
 
         /// <summary>
@@ -75,9 +71,13 @@ namespace Checkers
         }
 
         /// <summary>
-        /// This returns the current status of the game as int from [0,2]
+        /// This returns the current status of the game as an int
+        /// 0 = game in progress
+        /// 1 = blue won
+        /// 2 = red won
+        /// 3 = draw
         /// </summary>
-        /// <returns>0 for game not over, 1 for blue wins, 2 for red wins</returns>
+        /// <returns> 0 for game not over, 1 for blue wins, 2 for red wins, 3 for draw</returns>
         public int GameOver()
         {
             int blue = 0;
@@ -121,7 +121,9 @@ namespace Checkers
         /// </summary>
         /// <param name="prevPos">(int, int) of the pieces current position</param>
         /// <param name="pos">(int, int) of the pieces new position</param>
-        /// <returns></returns>
+        /// <param name="check">true if the user is doing a test whether a move is 
+        /// valid or not and false if the user is making a move</param>
+        /// <returns>true if a capture was made and false otherwise</returns>
         private bool Capture(Tuple<int, int> prevPos, Tuple<int, int> pos, bool check)
         {
             Tuple<int, int> between;
@@ -165,6 +167,11 @@ namespace Checkers
             return false;
         }
 
+        /// <summary>
+        /// finds every possible valid move that can be made from the given position
+        /// </summary>
+        /// <param name="prevPos">a spot on the board</param>
+        /// <returns>a list of all valid moves that can be made from prevPos</returns>
         public List<Tuple<int, int>> PossibleMoves(Tuple<int, int> prevPos)
         {
             List<Tuple<int, int>> validMoves = new();
@@ -199,10 +206,13 @@ namespace Checkers
         }
 
         /// <summary>
-        /// This does all the logic for a valid move
+        /// checks to see if a move is valid then makes a move
         /// </summary>
-        /// <param name="prevPos">(int, int) where the piece currently is</param>
-        /// <param name="pos">(int, int) where the piece is going</param>
+        /// <param name="prevPos">the starting position for the move</param>
+        /// <param name="pos">where the piece is trying to move to</param>
+        /// <param name="check">true if the user is doing a test to see if a move 
+        /// is valid or not and false if a move is being made</param>
+        /// <returns>true if the move is valid and false otherwise</returns>
         public bool Move(Tuple<int, int> prevPos, Tuple<int, int> pos, bool check)
         {
             // gets the current piece object and the change in x and y
@@ -211,11 +221,11 @@ namespace Checkers
             int x = Math.Abs(pos.Item1 - prevPos.Item1);
             int y = pos.Item2 - prevPos.Item2;
 
+            // if the move is out of bounds then it is invalid
             if (pos.Item1 < 0 || pos.Item2 < 0 || pos.Item1 > 7 || pos.Item2 > 7)
             {
                 return false;
             }
-
             // checks that we are trying to move a piece to a blank spot
             if (cur.Color == null || board[pos].Color != null)
             {
@@ -293,6 +303,12 @@ namespace Checkers
             return false;
         }
 
+        /// <summary>
+        /// checks to see if a move that was made captured a piece
+        /// </summary>
+        /// <param name="prevPos">the starting position of the move</param>
+        /// <param name="pos">the end position of the move</param>
+        /// <returns>true if the move was a capture and false otherwise</returns>
         public bool TookPiece(Tuple<int, int> prevPos, Tuple<int, int> pos)
         {
             if (prevPos == null || pos == null)

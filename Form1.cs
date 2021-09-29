@@ -10,7 +10,8 @@ namespace Checkers
     public partial class Form1 : Form
     {
         // constructs the Board
-        // both clickMemory and prevPos is used for handling user input
+        // both clickMemory, playerTuern, and prevPos are used for handling user input
+        // Player blue and red handle specific player actions
         private readonly Board checkerBoard = new();
         private Player blue = new();
         private Player red = new();
@@ -32,40 +33,33 @@ namespace Checkers
         }
 
         /// <summary>
-        /// A paint function is used to draw on the form window that is generated.
-        /// Like Tkinter in python there are functions that handle the complex part of drawing
-        /// specific shapes and importing images
+        /// A paint function is used to draw on a display object called a Windows Form
         /// </summary>
         /// <param name="sender">a reference to the contorl/object that riased the event, i.e. Form</param>
         /// <param name="e">the event data provided by the control object</param>
         private void Form1_Paint(object sender, PaintEventArgs e)
         {
-            // images are loaded into an image object then placed into the canvas
-            // this line of code is technically bad style, we couldn't figure out how to get the correct
-            // path for a 'resource/img/' directory or something so we just placed it where the code runs
+            // displays the board using an image of a checkerboard
             Image imageFile = Image.FromFile("board.png");
-
-            // this draws the image onto the canvas.
             e.Graphics.DrawImage(imageFile, 0, 0, 500, 500);
 
-            // to draw something that isn't an image, you need to make a brush object of that color
+            // constructs brushes and pens which are used to draw shapes
             SolidBrush blueBrush = new(Color.FromArgb(0, 150, 255));
             SolidBrush kingBlueBrush = new(Color.FromArgb(0, 0, 100));
             SolidBrush redBrush = new(Color.FromArgb(175, 0, 0));
             SolidBrush kingRedBrush = new(Color.FromArgb(100, 0, 0));
+            SolidBrush drawBrush = new(Color.White);
             Pen pen = new(Brushes.Black);
             pen.Width = 3;
 
-            // this chunk of code is for the game over screen, we set some text to be the color white
-            // the font size 45, about center with a little offset to adjust for text being draw from
-            // the top left of where you specify
+            // initializes and formats text that is drawn
             Font drawFont = new("Arial", 45);
-            SolidBrush drawBrush = new(Color.White);
             float stringX = Width / 2 - 150;
             float stringY = Height / 2 - 70;
             StringFormat drawFormat = new();
             drawFormat.FormatFlags = StringFormatFlags.DisplayFormatControl;
 
+            // handles repeated capturing for the player
             if (red.captured && !red.CanCapture(checkerBoard))
             {
                 prevPos = null;
@@ -74,13 +68,11 @@ namespace Checkers
                 Refresh();
             }
 
-            // a foreach loop syntax somewhere between javascript and python
-            // we go over each key of the board which stores where pieces are currently located at
+            // goes through each position on the board and displays where the pieces are
             foreach (Tuple<int, int> key in checkerBoard.board.Keys)
             {
-                // cur is the current Piece we are drawing
                 String color = checkerBoard.board[key].Color;
-                // since half or more of the board is empty we need to check if we're on a blank one or not
+                // checks for blank space
                 if (color == null)
                 {
                     continue;
@@ -104,12 +96,12 @@ namespace Checkers
                 {
                     e.Graphics.FillEllipse(kingRedBrush, x, y, 50, 50);
                 }
-                // Since we control the color field, we know the last option is the kingblue
                 else
                 {
                     e.Graphics.FillEllipse(kingBlueBrush, x, y, 50, 50);
                 }
 
+                // draws every piece on the board after each turn
                 foreach (Tuple<int, int> newPos in checkerBoard.PossibleMoves(prevPos))
                 {
                     x = newPos.Item1 * 62 + 8;
@@ -118,6 +110,7 @@ namespace Checkers
                 }
             }
 
+            // displays where the user can move with the selected piece
             if (clickMemory == 1 && prevPos != null)
             {
                 int indicatorX = prevPos.Item1 * 62 + 8;
@@ -126,7 +119,9 @@ namespace Checkers
             }
 
             // gameOver() == 0 means there are still pieces on the board
-            // gameOver() == 1 means that blue won and 2 means that red won
+            // gameOver() == 1 means that blue won
+            // gameOver() == 2 means that red won
+            // gameOver() == 3 means there is a tie
             if (checkerBoard.GameOver() == 1)
             {
                 // draws a square the size of the canvas and displays 'Blue Wins'
@@ -141,10 +136,12 @@ namespace Checkers
             }
             else if (checkerBoard.GameOver() == 3)
             {
-                // draws a square the size of the canvas and displays 'Red Wins'
+                // draws a square the size of the canvas and displays 'Draw'
                 e.Graphics.FillRectangle(blueBrush, 0, 0, 517, 540);
                 e.Graphics.DrawString("Draw", drawFont, redBrush, stringX+65, stringY, drawFormat);
             }
+
+            // handles CPU player turns
             else if (!playerTurn)
             {
                 blue.CPUMove(checkerBoard, playerTurn);
@@ -167,11 +164,12 @@ namespace Checkers
         /// <param name="e">the event data provided by the control object</param>
         private void Form1_MouseClick(object sender, MouseEventArgs e)
         {
+            // makes sure the player cannot make a move while it is not their turn
             if (!playerTurn)
             {
                 return;
             }
-            // we get the integer value of where the user clicked
+            // gets the position on the board where the user clicked
             Tuple<int, int> coord = new(e.X / 62, e.Y / 62);
 
             // clickMemory 0 means that we are selecting a piece
@@ -199,6 +197,7 @@ namespace Checkers
                     if (!red.captured)
                     {
                         red.PlayerMove(checkerBoard, prevPos, coord, playerTurn);
+                        // makes sure the player cannot move again if they didn't capture
                         if (!red.captured)
                         {
                             playerTurn = false;
