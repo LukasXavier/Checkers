@@ -18,8 +18,6 @@ namespace Checkers
             {
                 Color = color;
             }
-            // this isn't need for Checkers but I thought it was interesting that structs can have methods in C#
-            //public override string ToString() => $"{Color}";
         }
 
         // this is our data structure for storing the pieces
