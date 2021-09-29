@@ -13,8 +13,8 @@ namespace Checkers
         // both clickMemory, playerTuern, and prevPos are used for handling user input
         // Player blue and red handle specific player actions
         private readonly Board checkerBoard = new();
-        private Player blue = new();
-        private Player red = new();
+        private readonly Player blue = new();
+        private readonly Player red = new();
         private int clickMemory;
         private Tuple<int, int> prevPos;
         private bool playerTurn = true;
