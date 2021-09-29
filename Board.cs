@@ -1,17 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 
 namespace Checkers
 {
 
-    // test
     class Board
     {
         /**
-         *  original Piece was an object but we kept reducing it's functionally until it was just a
-         *  String with a single 1 line function, to further demonstrate C# we pulled it out and made
-         *  it a struct, we could have made the board a map from (int, int) --> String but thought
-         *  since we're using C# might as well use a struct add some flare.
+         *  Represents a piece on the board, can have a color value of "red",
+         *  "blue" or null. All spaces on the board have a Piece in them but 
+         *  spaces with no displayed piece have a color value of null.
          */
         public struct Piece
         {
@@ -20,11 +19,9 @@ namespace Checkers
             {
                 Color = color;
             }
-            // this isn't need for Checkers but I thought it was interesting that structs can have methods in C#
-            //public override string ToString() => $"{Color}";
         }
 
-        // this is our data structure for storing the pieces
+        // the data structure for storing the pieces
         public Dictionary<Tuple<int,int>, Piece> board;
 
         /// <summary>
@@ -36,55 +33,56 @@ namespace Checkers
             board = new();
 
             // loops through all the locations on the board and populates them with pieces
-            for (int x = 0; x < 8; x++)
+            for (int x = 0; x < 8; x += 2)
             {
                 for (int y = 0; y < 8; y++)
                 {
                     // the keys need to be established before we set the pieces down
                     board.Add(new(x, y), new(null));
+                    board.Add(new(x + 1, y), new(null));
                     // for the values between [0,2] are blue pieces but the middle row is offset from the others
-                    if (y == 0 || y == 2)
+
+                    if (y % 2 == 0)
                     {
-                        if ((x + 1) % 2 == 0)
+                        if (y < 3)
+                        {
+                            board[new(x + 1, y)] = new("blue");
+                        }
+                        else if (y > 4)
+                        {
+                            board[new(x + 1, y)] = new("red");
+                        }
+                    }
+                    else
+                    {
+                        if (y < 3)
                         {
                             board[new(x, y)] = new("blue");
                         }
-                    }
-                    if (y == 1)
-                    {
-                        if (x % 2 == 0)
-                        {
-                            board[new(x, y)] = new("blue");
-                        }
-                    }
-                    // for the values between [5,7] are red pieces but the middle row is offset from the others
-                    if (y == 5 || y == 7)
-                    {
-                        if (x % 2 == 0)
+                        else if (y > 4)
                         {
                             board[new(x, y)] = new("red");
                         }
                     }
-                    if (y == 6)
-                    {
-                        if ((x + 1) % 2 == 0)
-                        {
-                            board[new(x, y)] = new("red");
-                        }
-                    }
+                    
                 }
             }
 
         }
 
         /// <summary>
-        /// This returns the current status of the game as int from [0,2]
+        /// This returns the current status of the game as an int
+        /// 0 = game in progress
+        /// 1 = blue won
+        /// 2 = red won
+        /// 3 = draw
         /// </summary>
-        /// <returns>0 for game not over, 1 for blue wins, 2 for red wins</returns>
+        /// <returns> 0 for game not over, 1 for blue wins, 2 for red wins, 3 for draw</returns>
         public int GameOver()
         {
             int blue = 0;
             int red = 0;
+            int moves = 0;
             // counts sides pieces
             foreach (Tuple<int, int> key in board.Keys)
             {
@@ -97,9 +95,14 @@ namespace Checkers
                     else if (board[key].Color.Contains("blue")) {
                         blue++;
                     }
+                    moves += this.PossibleMoves(key).Count;
                 }
             }
-            if (blue > 0 && red > 0)
+            if (moves == 0)
+            {
+                return 3;
+            }
+            else if (blue > 0 && red > 0)
             {
                 return 0;
             }
@@ -118,8 +121,10 @@ namespace Checkers
         /// </summary>
         /// <param name="prevPos">(int, int) of the pieces current position</param>
         /// <param name="pos">(int, int) of the pieces new position</param>
-        /// <returns></returns>
-        private void Capture(Tuple<int, int> prevPos, Tuple<int, int> pos)
+        /// <param name="check">true if the user is doing a test whether a move is 
+        /// valid or not and false if the user is making a move</param>
+        /// <returns>true if a capture was made and false otherwise</returns>
+        private bool Capture(Tuple<int, int> prevPos, Tuple<int, int> pos, bool check)
         {
             Tuple<int, int> between;
             // this offset is the change in y from the old to new position, the two finds the piece it jumps over
@@ -136,34 +141,95 @@ namespace Checkers
             // checks that you're trying to capture the other player's piece
             if (board[between].Color == null || board[pos].Color != null)
             {
-                return;
+                return false;
             }
             if (board[prevPos].Color.Contains("red") == board[between].Color.Contains("blue"))
             {
                 // capturing a piece is the same as just deleting it
-                board[pos] = board[prevPos];
-                board[between] = new Piece(null);
-                board[prevPos] = new Piece(null);
+                if (!check)
+                {
+                    board[pos] = board[prevPos];
+                    board[between] = new Piece(null);
+                    board[prevPos] = new Piece(null);
+                    // if a blue piece makes it all the way to the 'top' it is promoted to a king
+                    if (pos.Item2 == 7 && board[pos].Color.Equals("blue"))
+                    {
+                        board[pos] = new Piece("king" + board[pos].Color);
+                    }
+                    // if a red piece makes it all the way to the 'bottom' it is promoted to a king
+                    if (pos.Item2 == 0 && board[pos].Color.Equals("red"))
+                    {
+                        board[pos] = new Piece("king" + board[pos].Color);
+                    }
+                }
+                return true;
             }
+            return false;
         }
 
         /// <summary>
-        /// This does all the logic for a valid move
+        /// finds every possible valid move that can be made from the given position
         /// </summary>
-        /// <param name="prevPos">(int, int) where the piece currently is</param>
-        /// <param name="pos">(int, int) where the piece is going</param>
-        public void Move(Tuple<int, int> prevPos, Tuple<int, int> pos)
+        /// <param name="prevPos">a spot on the board</param>
+        /// <returns>a list of all valid moves that can be made from prevPos</returns>
+        public List<Tuple<int, int>> PossibleMoves(Tuple<int, int> prevPos)
+        {
+            List<Tuple<int, int>> validMoves = new();
+            if (prevPos == null)
+            {
+                return validMoves;
+            }
+            for (int i = 2; i > 0; i--)
+            {
+                Tuple<int, int> pos = new(prevPos.Item1 + i, prevPos.Item2 + i);
+                Tuple<int, int> pos2 = new(prevPos.Item1 - i, prevPos.Item2 - i);
+                Tuple<int, int> pos3 = new(prevPos.Item1 + i, prevPos.Item2 - i);
+                Tuple<int, int> pos4 = new(prevPos.Item1 - i, prevPos.Item2 + i);
+                if (Move(prevPos, pos, true))
+                {
+                    validMoves.Add(pos);
+                }
+                if (Move(prevPos, pos2, true))
+                {
+                    validMoves.Add(pos2);
+                }
+                if (Move(prevPos, pos3, true))
+                {
+                    validMoves.Add(pos3);
+                }
+                if (Move(prevPos, pos4, true))
+                {
+                    validMoves.Add(pos4);
+                }
+            }
+            return validMoves;
+        }
+
+        /// <summary>
+        /// checks to see if a move is valid then makes a move
+        /// </summary>
+        /// <param name="prevPos">the starting position for the move</param>
+        /// <param name="pos">where the piece is trying to move to</param>
+        /// <param name="check">true if the user is doing a test to see if a move 
+        /// is valid or not and false if a move is being made</param>
+        /// <returns>true if the move is valid and false otherwise</returns>
+        public bool Move(Tuple<int, int> prevPos, Tuple<int, int> pos, bool check)
         {
             // gets the current piece object and the change in x and y
             // x is set to absolute since left and right moves are color independent
             Piece cur = board[prevPos];
             int x = Math.Abs(pos.Item1 - prevPos.Item1);
             int y = pos.Item2 - prevPos.Item2;
-            
+
+            // if the move is out of bounds then it is invalid
+            if (pos.Item1 < 0 || pos.Item2 < 0 || pos.Item1 > 7 || pos.Item2 > 7)
+            {
+                return false;
+            }
             // checks that we are trying to move a piece to a blank spot
             if (cur.Color == null || board[pos].Color != null)
             {
-                return;
+                return false;
             }
             // both blue and red kings act the same in terms of moving logic
             if (cur.Color.Contains("king"))
@@ -173,13 +239,17 @@ namespace Checkers
                 // checks that we are moving 1 square diagonally and updates the board
                 if (x == 1 && y == 1)
                 {
-                    board[pos] = cur;
-                    board[prevPos] = new Piece(null);
+                    if (!check)
+                    {
+                        board[pos] = cur;
+                        board[prevPos] = new Piece(null);
+                    }
+                    return true;
                 }
                 // attempts to capture
                 else if (x == 2 && y == 2)
                 {
-                    Capture(prevPos, pos);
+                    return Capture(prevPos, pos, check);
                 }
             }
             // non-king blue pieces can only move 'down' the board so the y bound is positive 1
@@ -188,18 +258,22 @@ namespace Checkers
                 // checks that we are moving 1 square diagonally and updates the board
                 if (x == 1 && y == 1)
                 {
-                    board[pos] = cur;
-                    board[prevPos] = new Piece(null);
+                    if (!check)
+                    {
+                        board[pos] = cur;
+                        board[prevPos] = new Piece(null);
+                        // if a blue piece makes it all the way to the 'top' it is promoted to a king
+                        if (pos.Item2 == 7)
+                        {
+                            board[pos] = new Piece("king" + board[pos].Color);
+                        }
+                    }
+                    return true;
                 }
                 // attempts to capture
                 else if (x == 2 && y == 2)
                 {
-                    Capture(prevPos, pos);
-                }
-                // if a blue piece makes it all the way to the 'bottom' it is promoted to a king
-                if (pos.Item2 == 7)
-                {
-                    board[pos] = new Piece("king" + board[pos].Color);
+                    return Capture(prevPos, pos, check);
                 }
             }
             // non-king red pieces can only move 'down' the board so the y bound is positive 1
@@ -208,20 +282,44 @@ namespace Checkers
                 // checks that we are moving 1 square diagonally and updates the board
                 if (x == 1 && y == -1)
                 {
-                    board[pos] = cur;
-                    board[prevPos] = new Piece(null);
+                    if (!check)
+                    {
+                        board[pos] = cur;
+                        board[prevPos] = new Piece(null);
+                        // if a red piece makes it all the way to the 'bottom' it is promoted to a king
+                        if (pos.Item2 == 0)
+                        {
+                            board[pos] = new Piece("king" + board[pos].Color);
+                        }
+                    }
+                    return true;
                 }
                 // attempts to capture
                 else if (x == 2 && y == -2)
                 {
-                    Capture(prevPos, pos);
-                }
-                // if a red piece makes it all the way to the 'top' it is promoted to a king
-                if (pos.Item2 == 0)
-                {
-                    board[pos] = new Piece("king" + board[pos].Color);
+                    return Capture(prevPos, pos, check);
                 }
             }
+            return false;
+        }
+
+        /// <summary>
+        /// checks to see if a move that was made captured a piece
+        /// </summary>
+        /// <param name="prevPos">the starting position of the move</param>
+        /// <param name="pos">the end position of the move</param>
+        /// <returns>true if the move was a capture and false otherwise</returns>
+        public bool TookPiece(Tuple<int, int> prevPos, Tuple<int, int> pos)
+        {
+            if (prevPos == null || pos == null)
+            {
+                return false;
+            }
+            if (Math.Abs(prevPos.Item1 - pos.Item1) == 2)
+            {
+                return true;
+            }
+            return false;
         }
     }
 }
