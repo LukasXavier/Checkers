@@ -18,16 +18,14 @@ https://github.com/LukasXavier/Checkers.git into the repo location and click clo
 find the 'Solution Explorer' double click on the Checkers.sln, now you're inside the project at the top
 there is a green play button labeled 'Checkers' if you click it, the game will start. 
 
-The game is very simple, you play as the red pieces, you click on the piece you would like to move, then click where
-you would like to move it, we implement an AI that can only be described as "aggressively stupid", in that it will
-pick a random move to make unless there is a capture move, it will also pick the capture move that will result
-in the most captures. There is a turn based check that does not allow you to make multiple moves in a row, unless it is
-for a multi-capture. There is checks for draws as well as when either play has no further moves to make but still has pieces.
-
 If you run the code yourself through VS you might get an error saying board.png is not found, simply move the board.png
 file from the root of the repository to bin/Debug/net5.0-windows/ or bin/Release/net5.0-windows/ if the first location
 did not solve your problem
 
+The game is very simple, you play as the red pieces, you click on the piece you would like to move, the game will then display
+all valid locations you can move to. If you capture a blue piece you get to go again. The bot you play against has looks through
+each of it's valid moves and makes the one what will capture the most pieces, if no move is better than another one, a random
+move will be made.
 
 
 *if you use some sort of emulation layer it might work on non-windows machines
